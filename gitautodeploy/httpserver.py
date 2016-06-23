@@ -255,6 +255,9 @@ class WebhookRequestHandler(BaseHTTPRequestHandler):
                 while n > 0:
 
                     # Attempt to pull up a maximum of 4 times
+                    if not repo_config.get('branch'):
+                        repo_config.update(
+                            {'branch': data.get('ref').split('/')[-1]})
                     res = GitWrapper.pull(repo_config)
                     repo_result['git pull'] = res
 
@@ -268,10 +271,9 @@ class WebhookRequestHandler(BaseHTTPRequestHandler):
                     res = GitWrapper.deploy(repo_config)
                     repo_result['deploy'] = res
 
-            #except Exception as e:
-            #    logger.error('Error during \'pull\' or \'deploy\' operation on path: %s' % repo_config['path'])
-            #    logger.error(e)
-            #    raise e
+            except Exception as e:
+                logger.error('Error during \'pull\' or \'deploy\' operation on path: %s' % repo_config['path'])
+                logger.error(e.message)
 
             finally:
 
