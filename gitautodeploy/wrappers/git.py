@@ -53,7 +53,7 @@ class GitWrapper():
     @staticmethod
     def clone(url, branch, path):
         from process import ProcessWrapper
-        res = ProcessWrapper().call(['git clone --recursive ' + url + ' -b ' + branch + ' ' + path], shell=True)
+        res = ProcessWrapper().call(['git clone --recursive ' + url + ' ' + '-b' + ' ' + (branch or 'master') + ' ' + path], shell=True)
         return int(res)
 
     @staticmethod

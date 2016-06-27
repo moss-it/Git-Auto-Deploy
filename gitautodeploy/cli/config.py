@@ -248,7 +248,7 @@ def init_config(config):
 
         # Setup branch if missing
         if 'branch' not in repo_config:
-            repo_config['branch'] = "master"
+            repo_config['branch'] = ""
 
         # Setup remote if missing
         if 'remote' not in repo_config:
