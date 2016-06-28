@@ -9,9 +9,9 @@ import urllib2
 import boto
 import yaml
 
-from .. import settings as ss
-from ..core.models import Revisions
-from ..core.session import SessionContext
+from new_frontend_deploy import settings as ss
+from new_frontend_deploy.core.models import Revisions
+from new_frontend_deploy.core.session import SessionContext
 
 AVAILABLE_ENVS = ["dev", "staging", "test", "production"]
 

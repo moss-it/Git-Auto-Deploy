@@ -1,24 +1,23 @@
 #!/usr/bin/env python
 import json
+import re
 import urllib2
 from BaseHTTPServer import BaseHTTPRequestHandler
 from BaseHTTPServer import HTTPServer
 from SocketServer import ThreadingMixIn
 from urlparse import urlparse, parse_qs
 
-import re
-
 from new_frontend_deploy.core.session import SessionContext
-from new_frontend_deploy.git_auto_deploy.revisions_utility import get_all_revisions, activate
-from project_settings import DEPLOYMENT_TOKEN, SERVER_MNG_TOKEN
+from new_frontend_deploy.revisions import get_all_revisions, activate
 
-PORT = 1340
-TOKEN = "123"
+
+PORT = 1338
+DEPLOYMENT_TOKEN = "7f2dbc5a1e9adcd8e4dc2a0e03e087c251906109"
 TEMPLATE = "^manager (?P<command>.*)$"
 
 
 def send_msg(msg):
-    url = ""
+    url = "https://hooks.slack.com/services/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"
     data = json.dumps({"text": msg})
     req = urllib2.Request(
         url,
@@ -32,11 +31,12 @@ def process(token, data, *args):
     message = data['text'][0]
     mention_name = data['user_name'][0].lower()
 
-    if token != TOKEN:
+    if token != DEPLOYMENT_TOKEN:
         return "<@{}> You have incorrect token! <@dk>".format(mention_name)
 
     if not re.match(TEMPLATE, message, re.DOTALL):
         return send_msg("Wrong request")
+
     kwargs = re.search(TEMPLATE, message, re.DOTALL).groupdict()
 
     command = kwargs.get('command')
@@ -58,7 +58,6 @@ def process(token, data, *args):
 
 
 class MyHandler(BaseHTTPRequestHandler):
-
     def _response(self, response_text):
         self.send_response(200)
         self.send_header('Content-type', 'application/json')
@@ -68,7 +67,7 @@ class MyHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         self.request = parse_qs(urlparse(self.path).query)
         token = self.request.get('token')[0]
-        if token not in [SERVER_MNG_TOKEN, DEPLOYMENT_TOKEN]:
+        if token != DEPLOYMENT_TOKEN:
             self._response('Access denied')
             return
 
@@ -83,11 +82,8 @@ class MyHandler(BaseHTTPRequestHandler):
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     """Handle requests in a separate thread."""
 
+
 if __name__ == '__main__':
-    # server = ThreadedHTTPServer(('', PORT), MyHandler)
-    # print 'Starting server, use <Ctrl-C> to stop'
-    # server.serve_forever()
-    process('123', {"text": ['manager get auth revisions for dev'],
-                    "user_name": ["dre"]})
-    # process('123', {"text": ['manager activate 123 for dev'],
-    #                 "user_name": ["dre"]})
+    server = ThreadedHTTPServer(('', PORT), MyHandler)
+    print 'Starting server, use <Ctrl-C> to stop'
+    server.serve_forever()

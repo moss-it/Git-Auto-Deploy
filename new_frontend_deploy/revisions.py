@@ -2,6 +2,7 @@ import argparse
 
 import boto
 import sqlalchemy as sa
+
 from new_frontend_deploy.core.models import Revisions
 from new_frontend_deploy.core.session import SessionContext
 
