@@ -9,7 +9,7 @@ from urlparse import urlparse, parse_qs
 
 from new_frontend_deploy.core.session import SessionContext
 from new_frontend_deploy.revisions import get_all_revisions, activate
-
+from new_frontend_deploy.settings import SLACK_URL
 
 PORT = 1338
 DEPLOYMENT_TOKEN = "7f2dbc5a1e9adcd8e4dc2a0e03e087c251906109"
@@ -17,7 +17,7 @@ TEMPLATE = "^manager (?P<command>.*)$"
 
 
 def send_msg(msg):
-    url = "https://hooks.slack.com/services/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"
+    url = SLACK_URL
     data = json.dumps({"text": msg})
     req = urllib2.Request(
         url,

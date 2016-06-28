@@ -5,6 +5,8 @@ import sqlalchemy as sa
 
 from new_frontend_deploy.core.models import Revisions
 from new_frontend_deploy.core.session import SessionContext
+from new_frontend_deploy.settings import aws_access_key_id, \
+    aws_secret_access_key
 
 CORS_XML_TEMPLATE = """
 <CORSConfiguration>
@@ -47,9 +49,6 @@ ORIGIN_HOSTS = [
     'gavel.collectriumdev.com',
     'gavel-app-test.collectriumdev.com',
 ]
-
-aws_access_key_id = ""
-aws_secret_access_key = ""
 
 
 def public_file_link(bucket_name, key):
@@ -108,7 +107,7 @@ def get_all_revisions(session, app, env):
     return res_str
 
 
-def activate(session, revision, env):
+def activate(session, commit_sha, env):
     query = sa.select(
         [
             Revisions.s3_bucket_name,
@@ -117,7 +116,7 @@ def activate(session, revision, env):
         ]
     ).where(
         sa.and_(
-            Revisions.revision_name == revision,
+            Revisions.commit_sha == commit_sha,
             Revisions.deploy_env == env
         )
     ).order_by(

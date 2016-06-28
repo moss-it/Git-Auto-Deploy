@@ -12,6 +12,7 @@ import yaml
 from new_frontend_deploy import settings as ss
 from new_frontend_deploy.core.models import Revisions
 from new_frontend_deploy.core.session import SessionContext
+from new_frontend_deploy.settings import SLACK_URL
 
 AVAILABLE_ENVS = ["dev", "staging", "test", "production"]
 
@@ -66,7 +67,7 @@ class Deploy(object):
 
     @staticmethod
     def send_msg(msg):
-        url = ""
+        url = SLACK_URL
         data = json.dumps({"text": msg})
         req = urllib2.Request(
             url,
@@ -229,7 +230,7 @@ class Deploy(object):
 
                 app_config = self.get_config(self.app, env)
                 global_config = self.get_config('global', env)
-
+                print global_config, app_config
                 revision_data = {
                     "app": self.app,
                     "deploy_env": env,
@@ -245,6 +246,7 @@ class Deploy(object):
                 }
 
                 res = self.create_env_file(global_config, env)
+                print res
                 if not res:
                     revision_data.update(
                         {"status": "failed",
@@ -260,6 +262,7 @@ class Deploy(object):
                     try:
                         output = subprocess.check_output(
                             ["ember", "deploy", env, "--verbose"])
+                        print output
                     except subprocess.CalledProcessError as e:
                         revision_data.update(
                             {"status": "failed",
@@ -276,12 +279,14 @@ class Deploy(object):
                     index_html_path = re.findall(pattern, output)
                     path = ""
                     revision_name = ""
+                    print index_html_path
                     if index_html_path:
                         index_html_path = index_html_path[0].split('/')
                         path = '/'.join((index_html_path[0],
                                          index_html_path[1]))
                         revision_name = index_html_path[-1]
 
+                    print index_html_path
                     if not path or not index_html_path:
                         revision_data.update(
                             {"status": "failed",
@@ -309,13 +314,6 @@ class Deploy(object):
                         session.add(new_deploy_data)
                         session.commit()
                         return
-                    try:
-                        self.send_msg(
-                            "Ember build done for {} on {} revision: *{}*".format(
-                                self.app, env, revision_name
-                            ))
-                    except Exception as e:
-                        print e.message
 
                     revision_data.update({
                         "index_html_path": path,
@@ -325,6 +323,30 @@ class Deploy(object):
 
                     new_deploy_data = Revisions(**revision_data)
                     session.add(new_deploy_data)
+
+                    try:
+                        self.send_msg(
+                            '''
+                            `{}` :arrow_right: `{}`\n
+                            activate command: `activate {} on {}`\n
+                            ```Commit info:\n
+                                sha: {}\n
+                                date: {}\n
+                                author: {}\n
+                                message: {}\n```
+                            '''.format(
+                                self.app,
+                                env,
+                                commit_data.get("sha"),
+                                env,
+                                commit_data.get("sha"),
+                                commit_data.get("date"),
+                                commit_data.get("author"),
+                                commit_data.get("message")
+                                )
+                            )
+                    except Exception as e:
+                        print e.message
 
                 except Exception as e:
                     revision_data.update(
