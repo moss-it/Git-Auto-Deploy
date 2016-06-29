@@ -243,7 +243,7 @@ class Deploy(object):
                     "commit_date": commit_data.get('date'),
                     "commit_message": commit_data.get('message')
                 }
-
+                print "start creating env"
                 res = self.create_env_file(global_config, env)
                 if not res:
                     revision_data.update(
@@ -253,8 +253,9 @@ class Deploy(object):
                     session.add(new_deploy_data)
                     session.commit()
                     return
-
+                print "end creating env"
                 try:
+                    print "start install ember"
                     self.install_ember_packages()
                     print "installed packages"
                     self.update_project_config(app_config, global_config)
