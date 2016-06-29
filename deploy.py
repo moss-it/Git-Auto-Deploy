@@ -89,6 +89,14 @@ class Deploy(object):
         p = subprocess.Popen(["sudo", "pkgcache", "install", "npm"])
         p.wait()
 
+        p = subprocess.Popen(["sudo", "chown", "ubuntu:ubuntu",
+                              "-R", "/home/ubuntu/.cache/"])
+        p.wait()
+
+        p = subprocess.Popen(["sudo", "chown", "ubuntu:ubuntu",
+                              "-R", "/home/ubuntu/.config/"])
+        p.wait()
+
         p = subprocess.Popen(["sudo", "pkgcache", "install", "bower"])
         p.wait()
 
