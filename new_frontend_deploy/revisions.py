@@ -69,39 +69,34 @@ def setup_cors(aws_access_key_id, aws_secret_access_key,
     bucket.set_cors_xml(cors_xml)
 
 
-def get_all_revisions(session, app, env):
+def get_all_revisions(session, app):
     query = sa.select(
         [
-            Revisions.revision_name,
-            Revisions.tag,
-            Revisions.commit_message,
+            Revisions.commit_sha,
             Revisions.commit_author,
-            Revisions.record_created,
+            Revisions.commit_date,
+            Revisions.deploy_env
         ]
     ).where(
-        sa.and_(
-            Revisions.app == app,
-            Revisions.deploy_env == env
-        )
+            Revisions.app == app
     ).order_by(
-        sa.asc(
+        sa.desc(
             Revisions.id
         )
-    )
+    ).limit(50)
 
     revisions = session.execute(query).fetchall()
-    res_str = '*{} - {}*\n'.format(app, env)
     if not revisions:
-        res_str += "There is no revisions for this app"
-        return res_str
+        return "There is no revisions for this app"
 
+    res_str = ""
     for rev in revisions:
         res_str += '`{} {} {} {} {}`\n'.format(
-            rev.revision_name,
-            rev.record_created,
-            rev.commit_message,
-            rev.commit_author,
-            rev.tag or "",
+            app,
+            rev.deploy_env,
+            rev.commit_sha,
+            rev.commit_date,
+            rev.commit_author
         )
 
     return res_str
