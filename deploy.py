@@ -252,8 +252,9 @@ class Deploy(object):
                     "commit_date": commit_data.get('date'),
                     "commit_message": commit_data.get('message')
                 }
-                print "start creating env"
+
                 res = self.create_env_file(global_config, env)
+
                 if not res:
                     revision_data.update(
                         {"status": "failed",
@@ -262,18 +263,18 @@ class Deploy(object):
                     session.add(new_deploy_data)
                     session.commit()
                     return
-                print "end creating env"
+
                 try:
-                    print "start install ember"
+
                     self.install_ember_packages()
-                    print "installed packages"
+
                     self.update_project_config(app_config, global_config)
-                    print "updated_configs"
+
                     try:
-                        print "start building ember"
+
                         output = subprocess.check_output(
                             ["ember", "deploy", env, "--verbose"])
-                        print output
+
                     except subprocess.CalledProcessError as e:
                         revision_data.update(
                             {"status": "failed",
@@ -290,14 +291,13 @@ class Deploy(object):
                     index_html_path = re.findall(pattern, output)
                     path = ""
                     revision_name = ""
-                    print index_html_path
+
                     if index_html_path:
                         index_html_path = index_html_path[0].split('/')
                         path = '/'.join((index_html_path[0],
                                          index_html_path[1]))
                         revision_name = index_html_path[-1]
 
-                    print index_html_path
                     if not path or not index_html_path:
                         revision_data.update(
                             {"status": "failed",
@@ -335,27 +335,21 @@ class Deploy(object):
                     new_deploy_data = Revisions(**revision_data)
                     session.add(new_deploy_data)
 
+                    msg = "`{}` :arrow_right: `{}`\n".format(self.app, env)
+                    msg += "`RELEASE TAG: {}\n".format(commit_data.get("tag")) \
+                        if commit_data.get("tag") else ""
+                    msg += "activate command: `activate {} on {}`\n".format(
+                        commit_data.get("sha"),
+                        env
+                    )
+                    msg += "```Commit info:\nsha: {}\ndate: {}\nauthor: {}\nmessage: {}\n```".format(
+                        commit_data.get("sha"),
+                        commit_data.get("date"),
+                        commit_data.get("author"),
+                        commit_data.get("message")
+                    )
                     try:
-                        self.send_msg(
-                            '''
-                            `{}` :arrow_right: `{}`\n
-                            activate command: `activate {} on {}`\n
-                            ```Commit info:\n
-                                sha: {}\n
-                                date: {}\n
-                                author: {}\n
-                                message: {}\n```
-                            '''.format(
-                                self.app,
-                                env,
-                                commit_data.get("sha"),
-                                env,
-                                commit_data.get("sha"),
-                                commit_data.get("date"),
-                                commit_data.get("author"),
-                                commit_data.get("message")
-                                )
-                            )
+                        self.send_msg(msg)
                     except Exception as e:
                         print e.message
 

@@ -72,11 +72,9 @@ def setup_cors(aws_access_key_id, aws_secret_access_key,
 def get_all_revisions(session, app, env):
     query = sa.select(
         [
-            Revisions.revision_name,
-            Revisions.tag,
-            Revisions.commit_message,
+            Revisions.commit_sha,
             Revisions.commit_author,
-            Revisions.record_created,
+            Revisions.commit_date,
         ]
     ).where(
         sa.and_(
@@ -84,10 +82,10 @@ def get_all_revisions(session, app, env):
             Revisions.deploy_env == env
         )
     ).order_by(
-        sa.asc(
+        sa.desc(
             Revisions.id
         )
-    )
+    ).limit(10)
 
     revisions = session.execute(query).fetchall()
     res_str = '*{} - {}*\n'.format(app, env)
@@ -97,11 +95,11 @@ def get_all_revisions(session, app, env):
 
     for rev in revisions:
         res_str += '`{} {} {} {} {}`\n'.format(
-            rev.revision_name,
-            rev.record_created,
-            rev.commit_message,
-            rev.commit_author,
-            rev.tag or "",
+            app,
+            env,
+            rev.commit_sha,
+            rev.commit_date,
+            rev.commit_author
         )
 
     return res_str
