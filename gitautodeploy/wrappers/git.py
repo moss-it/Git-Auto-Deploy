@@ -31,6 +31,7 @@ class GitWrapper():
             commands.append('unset GIT_DIR')
 
         commands.append('git fetch ' + repo_config['remote'])
+        commands.append('git checkout ' + repo_config['branch'])
         commands.append('git reset --hard ' + repo_config['remote'] + '/' + repo_config['branch'])
         commands.append('git submodule update --init --recursive')
         #commands.append('git update-index --refresh')
