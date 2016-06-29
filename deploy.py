@@ -86,7 +86,7 @@ class Deploy(object):
                               "ember-cli@1.13.13"])
         p.wait()
 
-        p = subprocess.Popen(["sudo", "pkgcache", "install", "npm"])
+        p = subprocess.Popen(["sudo", "pkgcache", "install", "npm", "bower"])
         p.wait()
 
         p = subprocess.Popen(["sudo", "chown", "ubuntu:ubuntu",
@@ -95,9 +95,6 @@ class Deploy(object):
 
         p = subprocess.Popen(["sudo", "chown", "ubuntu:ubuntu",
                               "-R", "/home/ubuntu/.config/"])
-        p.wait()
-
-        p = subprocess.Popen(["sudo", "pkgcache", "install", "bower"])
         p.wait()
 
         p = subprocess.Popen(["bower", "install"])
