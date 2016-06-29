@@ -92,6 +92,9 @@ class Deploy(object):
         p = subprocess.Popen(["sudo", "pkgcache", "install", "bower"])
         p.wait()
 
+        p = subprocess.Popen(["sudo", "pkgcache", "bower", "install"])
+        p.wait()
+
     def update_json_config(self, app_config, global_settings):
 
         def update_config(config, route, value):
