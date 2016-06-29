@@ -79,16 +79,17 @@ class Deploy(object):
     @staticmethod
     def install_ember_packages():
 
-        p = subprocess.Popen(["pkgcache", "install", "npm"])
+        p = subprocess.Popen(["sudo", "pkgcache", "install", "npm"])
         p.wait()
 
-        p = subprocess.Popen(["pkgcache", "install", "-g", "ember-cli@1.13.13"])
+        p = subprocess.Popen(["sudo", "pkgcache", "install", "-g",
+                              "ember-cli@1.13.13"])
         p.wait()
 
-        p = subprocess.Popen(["pkgcache", "install", "npm"])
+        p = subprocess.Popen(["sudo", "pkgcache", "install", "npm"])
         p.wait()
 
-        p = subprocess.Popen(["pkgcache", "install", "bower"])
+        p = subprocess.Popen(["sudo", "pkgcache", "install", "bower"])
         p.wait()
 
     def update_json_config(self, app_config, global_settings):
