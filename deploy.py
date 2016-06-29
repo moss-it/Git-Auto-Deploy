@@ -230,7 +230,6 @@ class Deploy(object):
 
                 app_config = self.get_config(self.app, env)
                 global_config = self.get_config('global', env)
-                print global_config, app_config
                 revision_data = {
                     "app": self.app,
                     "deploy_env": env,
@@ -246,7 +245,6 @@ class Deploy(object):
                 }
 
                 res = self.create_env_file(global_config, env)
-                print res
                 if not res:
                     revision_data.update(
                         {"status": "failed",
@@ -258,8 +256,11 @@ class Deploy(object):
 
                 try:
                     self.install_ember_packages()
+                    print "installed packages"
                     self.update_project_config(app_config, global_config)
+                    print "updated_configs"
                     try:
+                        print "start building ember"
                         output = subprocess.check_output(
                             ["ember", "deploy", env, "--verbose"])
                         print output
