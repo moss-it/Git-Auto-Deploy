@@ -89,7 +89,7 @@ class Deploy(object):
         p = subprocess.Popen(["sudo", "pkgcache", "install", "npm"])
         p.wait()
 
-        p = subprocess.Popen(["sudo", "npm", "install", "bower"])
+        p = subprocess.Popen(["npm", "install", "bower"])
         p.wait()
 
         p = subprocess.Popen(["sudo", "chown", "ubuntu:ubuntu",
@@ -209,9 +209,6 @@ class Deploy(object):
                 "date": commit_data[3],
                 "sha": commit_sha}
 
-        if "production" not in self.envs:
-            return resp
-
         commit_info = subprocess.check_output(
             ["git", "show-ref", "--tags"])
 
@@ -219,7 +216,6 @@ class Deploy(object):
             return resp
 
         commit_info = commit_info.split("\n")
-        commit_sha = "ec557f661e2bac642aca6f6150e75a9d4a708807"
         tag = [x.split("/tags/")[1] for x in commit_info if
                x.startswith(commit_sha)]
 
