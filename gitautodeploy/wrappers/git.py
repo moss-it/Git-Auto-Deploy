@@ -30,6 +30,7 @@ class GitWrapper():
         else:
             commands.append('unset GIT_DIR')
 
+        commands.append('git checkout -- .')
         commands.append('git fetch ' + repo_config['remote'])
         commands.append('git checkout master')
         commands.append('git checkout ' + (repo_config['branch'] or repo_config['tag']))
