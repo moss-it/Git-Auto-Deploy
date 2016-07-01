@@ -79,16 +79,25 @@ class Deploy(object):
     @staticmethod
     def install_ember_packages():
 
-        p = subprocess.Popen(["pkgcache", "install", "npm"])
+        p = subprocess.Popen(["sudo", "pkgcache", "install", "npm"])
         p.wait()
 
-        p = subprocess.Popen(["pkgcache", "install", "-g", "ember-cli@1.13.13"])
+        p = subprocess.Popen(["sudo", "pkgcache", "install", "-g",
+                              "ember-cli@1.13.13"])
         p.wait()
 
-        p = subprocess.Popen(["pkgcache", "install", "npm"])
+        p = subprocess.Popen(["sudo", "pkgcache", "install", "npm", "bower"])
         p.wait()
 
-        p = subprocess.Popen(["pkgcache", "install", "bower"])
+        p = subprocess.Popen(["sudo", "chown", "ubuntu:ubuntu",
+                              "-R", "/home/ubuntu/.cache/"])
+        p.wait()
+
+        p = subprocess.Popen(["sudo", "chown", "ubuntu:ubuntu",
+                              "-R", "/home/ubuntu/.config/"])
+        p.wait()
+
+        p = subprocess.Popen(["bower", "install"])
         p.wait()
 
     def update_json_config(self, app_config, global_settings):
@@ -230,7 +239,6 @@ class Deploy(object):
 
                 app_config = self.get_config(self.app, env)
                 global_config = self.get_config('global', env)
-                print global_config, app_config
                 revision_data = {
                     "app": self.app,
                     "deploy_env": env,
@@ -246,7 +254,7 @@ class Deploy(object):
                 }
 
                 res = self.create_env_file(global_config, env)
-                print res
+
                 if not res:
                     revision_data.update(
                         {"status": "failed",
@@ -257,12 +265,16 @@ class Deploy(object):
                     return
 
                 try:
+
                     self.install_ember_packages()
+
                     self.update_project_config(app_config, global_config)
+
                     try:
+
                         output = subprocess.check_output(
                             ["ember", "deploy", env, "--verbose"])
-                        print output
+
                     except subprocess.CalledProcessError as e:
                         revision_data.update(
                             {"status": "failed",
@@ -279,14 +291,13 @@ class Deploy(object):
                     index_html_path = re.findall(pattern, output)
                     path = ""
                     revision_name = ""
-                    print index_html_path
+
                     if index_html_path:
                         index_html_path = index_html_path[0].split('/')
                         path = '/'.join((index_html_path[0],
                                          index_html_path[1]))
                         revision_name = index_html_path[-1]
 
-                    print index_html_path
                     if not path or not index_html_path:
                         revision_data.update(
                             {"status": "failed",
@@ -324,27 +335,21 @@ class Deploy(object):
                     new_deploy_data = Revisions(**revision_data)
                     session.add(new_deploy_data)
 
+                    msg = "`{}` :arrow_right: `{}`\n".format(self.app, env)
+                    msg += "`RELEASE TAG: {}\n".format(commit_data.get("tag")) \
+                        if commit_data.get("tag") else ""
+                    msg += "activate command: `activate {} on {}`\n".format(
+                        commit_data.get("sha"),
+                        env
+                    )
+                    msg += "```Commit info:\nsha: {}\ndate: {}\nauthor: {}\nmessage: {}\n```".format(
+                        commit_data.get("sha"),
+                        commit_data.get("date"),
+                        commit_data.get("author"),
+                        commit_data.get("message")
+                    )
                     try:
-                        self.send_msg(
-                            '''
-                            `{}` :arrow_right: `{}`\n
-                            activate command: `activate {} on {}`\n
-                            ```Commit info:\n
-                                sha: {}\n
-                                date: {}\n
-                                author: {}\n
-                                message: {}\n```
-                            '''.format(
-                                self.app,
-                                env,
-                                commit_data.get("sha"),
-                                env,
-                                commit_data.get("sha"),
-                                commit_data.get("date"),
-                                commit_data.get("author"),
-                                commit_data.get("message")
-                                )
-                            )
+                        self.send_msg(msg)
                     except Exception as e:
                         print e.message
 

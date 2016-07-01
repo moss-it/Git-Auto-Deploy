@@ -264,7 +264,7 @@ class WebhookRequestHandler(BaseHTTPRequestHandler):
                         else:
                             repo_config.update(
                                 {'branch': data.get('ref')})
-                            
+
                     res = GitWrapper.pull(repo_config)
                     repo_result['git pull'] = res
 

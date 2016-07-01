@@ -49,7 +49,7 @@ def process(token, data, *args):
     with SessionContext() as session:
 
         if "get" in command:
-            resp = get_all_revisions(session, command[1], command[-1])
+            resp = get_all_revisions(session, command[1])
 
         elif "activate" in command:
             resp = activate(session, command[1], command[-1])
