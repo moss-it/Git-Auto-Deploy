@@ -258,12 +258,13 @@ class WebhookRequestHandler(BaseHTTPRequestHandler):
                     print repo_config
 
                     if not repo_config.get('branch'):
-                        if '/' in data.get('ref'):
+                        if '/' in data.get('ref') \
+                                and data.get('ref_type') == "branch":
                             repo_config.update(
                                 {'branch': data.get('ref').split('/')[-1]})
-                        else:
+                        elif data.get('ref_type') == "tag":
                             repo_config.update(
-                                {'branch': data.get('ref')})
+                                {'tag': data.get('ref')})
 
                     res = GitWrapper.pull(repo_config)
                     repo_result['git pull'] = res
