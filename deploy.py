@@ -199,9 +199,10 @@ class Deploy(object):
             ["git", "rev-parse", "HEAD"])[:-2]
 
         commit_data = subprocess.check_output(
-            ["git", "show", "-s", "--format=%B%n%cn%n%ce%n%ci", commit_sha])
+            ["git", "show", "-s", "--format=%B%%%an%%%ae%%%ci", commit_sha])
 
-        commit_data = [x for x in commit_data.split("\n") if x]
+        commit_data = [x.replace('\n', " ") for x in commit_data.split("%")
+                       if x]
 
         resp = {"message": commit_data[0],
                 "author": commit_data[1],
