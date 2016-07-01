@@ -255,10 +255,16 @@ class WebhookRequestHandler(BaseHTTPRequestHandler):
                 while n > 0:
 
                     # Attempt to pull up a maximum of 4 times
-                    if not repo_config.get('branch'):
-                        repo_config.update(
-                            {'branch': data.get('ref').split('/')[-1]})
                     print repo_config
+
+                    if not repo_config.get('branch'):
+                        if '/' in data.get('ref'):
+                            repo_config.update(
+                                {'branch': data.get('ref').split('/')[-1]})
+                        else:
+                            repo_config.update(
+                                {'branch': data.get('ref')})
+                            
                     res = GitWrapper.pull(repo_config)
                     repo_result['git pull'] = res
 

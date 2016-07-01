@@ -8,6 +8,7 @@ class GitHubRequestParser(WebhookRequestParser):
 
         logger = logging.getLogger()
         data = json.loads(request_body)
+        print data
 
         repo_urls = []
         ref = ""
