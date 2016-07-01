@@ -219,7 +219,7 @@ class Deploy(object):
         tag = [x.split("/tags/")[1] for x in commit_info if
                x.startswith(commit_sha)]
 
-        resp.update({"tag": tag})
+        resp.update({"tag": tag[0] if tag else ""})
 
         return resp
 
@@ -335,7 +335,7 @@ class Deploy(object):
                     session.add(new_deploy_data)
 
                     msg = "`{}` :arrow_right: `{}`\n".format(self.app, env)
-                    msg += "`RELEASE TAG: {}\n".format(commit_data.get("tag")) \
+                    msg += "`RELEASE TAG`: {}\n".format(commit_data.get("tag")) \
                         if commit_data.get("tag") else ""
                     msg += "activate command: `activate {} on {}`\n".format(
                         commit_data.get("sha"),
