@@ -52,8 +52,9 @@ class Deploy(object):
         for key in ss.AWS_S3_KEYS:
             config_str += "{}={}\n".format(key, global_config.get(key))
 
-        config_str += "{}={}\n".format(
-            "aws_s3_bucket_prefix",
+        config_str += "aws_s3_bucket_name={}\n".format(
+            global_config.get(self.app))
+        config_str += "aws_s3_bucket_prefix={}\n".format(
             self.app + '/' + datetime.datetime.now().strftime('%Y%m%d_%H%M%S'))
 
         file_name = ".env.deploy.{}".format(env)
@@ -171,7 +172,7 @@ class Deploy(object):
         return 'https://%s.s3.amazonaws.com/%s' % (bucket_name, key)
 
     def refactor_path(self, index_html_path, revision, global_config):
-        s3_bucket_name = global_config.get('aws_s3_bucket_name')
+        s3_bucket_name = global_config.get(self.app)
         conn = boto.connect_s3(global_config.get("aws_s3_key"),
                                global_config.get("aws_s3_secret_key"))
 
@@ -242,8 +243,7 @@ class Deploy(object):
                 revision_data = {
                     "app": self.app,
                     "deploy_env": env,
-                    "s3_bucket_name": global_config.get(
-                        'aws_s3_bucket_name'),
+                    "s3_bucket_name": global_config.get(self.app),
                     "record_created": datetime.datetime.utcnow(),
                     "record_modified": None,
                     "tag": commit_data.get("tag"),
