@@ -127,7 +127,8 @@ def activate(session, commit_sha, env):
 
     key = bucket.get_key(revision_data.index_html_path + '/' + 'index.html')
     if key.name:
-        bucket.copy_key("index.html", bucket.name, key.name)
+        bucket.copy_key("index.html", bucket.name, key.name,
+                        metadata={'Content-Type': 'text/html'})
         return "Done!"
     else:
         return "There is no such revision."
