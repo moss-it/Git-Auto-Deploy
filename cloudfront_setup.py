@@ -193,7 +193,7 @@ class CloudFrontDeploy(object):
                 "CallerReference": str(int(time.time())),
                 "ViewerCertificate": {
                     "SSLSupportMethod": "sni-only",
-                    "MinimumProtocolVersion": "TLSv1.2",
+                    "MinimumProtocolVersion": "TLSv1",
                     "IAMCertificateId": self.certificate_id,
                     "Certificate": self.certificate_id,
                     "CertificateSource": "iam"
