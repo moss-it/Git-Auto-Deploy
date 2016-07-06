@@ -131,31 +131,3 @@ def activate(session, commit_sha, env):
         return "Done!"
     else:
         return "There is no such revision."
-
-
-        # TODO: set up cors if they are need
-        # setup_cors(
-        #     aws_access_key_id=self.global_config.get('aws_s3_access_key'),
-        #     aws_secret_access_key=self.global_config.get(
-        #         'aws_s3_secret_access_key'),
-        #     aws_storage_bucket_name=self.global_config.get(
-        #         'aws_assets_bucket_name'),
-        # )
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-l', '--list', help='All revisions for app')
-    parser.add_argument('-a', '--activate', help='Activate revision')
-
-    args = parser.parse_args()
-
-    with SessionContext() as session:
-        if args.list:
-            print get_all_revisions(session, args.list, "test")
-
-        elif args.activate:
-            print activate(session, args.activate, "dev")
-
-        else:
-            parser.print_help()
