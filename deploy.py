@@ -169,7 +169,7 @@ class Deploy(object):
 
     @staticmethod
     def public_file_link(bucket_name, key):
-        return 'https://%s.s3.amazonaws.com/%s' % (bucket_name, key)
+        return 'https://{}/{}'.format(bucket_name, key)
 
     def refactor_path(self, index_html_path, revision, global_config):
         s3_bucket_name = global_config.get(self.app)
