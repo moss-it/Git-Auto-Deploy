@@ -142,6 +142,10 @@ class CloudFrontDeploy(object):
             self.invalidate = False
             print "Create CF domain "
             distribution_config = {
+                'Aliases': {
+                    'Quantity': 1,
+                    'Items': [self.domain_name]
+                },
                 "Comment": "",
                 "Origins": {
                     "Items": [

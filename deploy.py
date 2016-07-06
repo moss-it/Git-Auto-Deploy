@@ -191,7 +191,7 @@ class Deploy(object):
 
         new_key = bucket.new_key(
             "/{}/index.html".format(index_html_path))
-        new_key.content_type = "text/plain"
+        new_key.content_type = "text/html"
         new_key.set_contents_from_string(content, num_cb=100)
         new_key.make_public()
 
