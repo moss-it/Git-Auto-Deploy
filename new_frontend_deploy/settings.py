@@ -5,9 +5,7 @@ POSTGRESQL_USERNAME = 'postgres'
 POSTGRESQL_PASSWORD = 'postgres'
 POSTGRESQL_ECHO_MODE = False
 
-aws_access_key_id = ""
-aws_secret_access_key = ""
-
+PATH_TO_CONFIGS = ""
 SLACK_URL = "https://hooks.slack.com/services/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"
 
 FRONTEND_SETTINGS_KEYS = (

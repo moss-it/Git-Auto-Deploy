@@ -1,69 +1,11 @@
+import os
+
 import boto
 import sqlalchemy as sa
+import yaml
 
 from new_frontend_deploy.core.models import Revisions
-from new_frontend_deploy.settings import aws_access_key_id, \
-    aws_secret_access_key
-
-CORS_XML_TEMPLATE = """
-<CORSConfiguration>
-{RULES}
-</CORSConfiguration>
-"""
-
-CORS_RULE_TEMPLATE = """
-<CORSRule>
-  <AllowedOrigin>https://{DOMAIN}</AllowedOrigin>
-  <AllowedMethod>GET</AllowedMethod>
-  <AllowedHeader>*</AllowedHeader>
-</CORSRule>
-<CORSRule>
-  <AllowedOrigin>http://{DOMAIN}</AllowedOrigin>
-  <AllowedMethod>GET</AllowedMethod>
-  <AllowedHeader>*</AllowedHeader>
-</CORSRule>
- <CORSRule>
-   <AllowedOrigin>*</AllowedOrigin>
-   <AllowedMethod>GET</AllowedMethod>
- </CORSRule>
-"""
-
-ORIGIN_HOSTS = [
-    'app.local.collectrium.com:5000',
-    'col5-app-devondemand.collectrium.com',
-    'col5-app-devondemand2.collectrium.com',
-    'col5-app.collectrium.com',
-    'col5-app-test.collectrium.com',
-    'col5-app-staging.collectrium.com',
-    'col5-app-dev.collectrium.com',
-    'col5-auth.collectrium.com',
-    'col5-auth-test.collectrium.com',
-    'col5-auth-staging.collectrium.com',
-    'col5-auth-dev.collectrium.com',
-    'auth-cams.collectriumdev.com',
-    'app.collectriumdev.com',
-    'auth.collectriumdev.com',
-    'gavel.collectriumdev.com',
-    'gavel-app-test.collectriumdev.com',
-]
-
-
-def public_file_link(bucket_name, key):
-    return 'https://%s.s3.amazonaws.com/%s' % (bucket_name, key)
-
-
-def setup_cors(aws_access_key_id, aws_secret_access_key,
-               aws_storage_bucket_name):
-    domains = ORIGIN_HOSTS
-    conn = boto.connect_s3(aws_access_key_id, aws_secret_access_key)
-    bucket = conn.get_bucket(aws_storage_bucket_name)
-    domains = set(domains)
-    cors_rules = ""
-    for domain in domains:
-        cors_rules += CORS_RULE_TEMPLATE.format(DOMAIN=domain)
-
-    cors_xml = CORS_XML_TEMPLATE.format(RULES=cors_rules)
-    bucket.set_cors_xml(cors_xml)
+from new_frontend_deploy.settings import PATH_TO_CONFIGS
 
 
 def get_all_revisions(session, app):
@@ -123,14 +65,30 @@ def activate(session, commit, env):
     ).limit(1)
     revision_data = session.execute(query).fetchone()
 
-    # TODO: get keys accoding to env
-    conn = boto.connect_s3(aws_access_key_id, aws_secret_access_key)
-    bucket = conn.get_bucket(revision_data.s3_bucket_name)
+    if not PATH_TO_CONFIGS:
+        print 'Wrong configs dir in settings.py!'
+        return "Error with revision activation, check git configs please!"
 
-    key = bucket.get_key(revision_data.index_html_path + '/' + 'index.html')
-    if key.name:
-        bucket.copy_key("index.html", bucket.name, key.name,
-                        metadata={'Content-Type': 'text/html'})
-        return "Done!"
-    else:
-        return "There is no such revision."
+    with open(os.path.join(PATH_TO_CONFIGS, '{}/global.yml'.format(env))) as f:
+        global_settings = yaml.load(f)
+
+    try:
+        conn = boto.connect_s3(global_settings.get('aws_access_key'),
+                               global_settings.get('aws_secret_access_key'))
+        bucket = conn.get_bucket(revision_data.s3_bucket_name)
+    except Exception as e:
+        print e.message
+        return "Error with connection to AWS S3"
+
+    try:
+        key = bucket.get_key(revision_data.index_html_path + '/' + 'index.html')
+        if key.name:
+            bucket.copy_key("index.html", bucket.name, key.name,
+                            metadata={'Content-Type': 'text/html'})
+            return "Done!"
+        else:
+            return "There is no such revision."
+
+    except Exception as e:
+        print e.message
+        return "Error with activation {} on {}".format(commit, env)
