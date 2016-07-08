@@ -194,6 +194,17 @@ class CloudFrontDeploy(object):
                     "MinTTL": 0,
                     "Compress": True
                 },
+                'CustomErrorResponses': {
+                    'Quantity': 1,
+                    'Items': [
+                        {
+                            'ErrorCode': 404,
+                            'ResponsePagePath': '/index.html',
+                            'ResponseCode': '200',
+                            'ErrorCachingMinTTL': 300
+                        },
+                    ]
+                },
                 "CallerReference": str(int(time.time())),
                 "ViewerCertificate": {
                     "SSLSupportMethod": "sni-only",
