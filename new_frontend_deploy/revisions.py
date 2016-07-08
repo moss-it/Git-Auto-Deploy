@@ -1,10 +1,7 @@
-import argparse
-
 import boto
 import sqlalchemy as sa
 
 from new_frontend_deploy.core.models import Revisions
-from new_frontend_deploy.core.session import SessionContext
 from new_frontend_deploy.settings import aws_access_key_id, \
     aws_secret_access_key
 
@@ -78,7 +75,7 @@ def get_all_revisions(session, app):
             Revisions.deploy_env
         ]
     ).where(
-            Revisions.app == app
+        Revisions.app == app
     ).order_by(
         sa.desc(
             Revisions.id
@@ -94,7 +91,7 @@ def get_all_revisions(session, app):
         res_str += '`{} {} {} {} {}`\n'.format(
             app,
             rev.deploy_env,
-            rev.commit_sha,
+            rev.commit_sha[:7] if rev.commit_sha else "",
             rev.commit_date,
             rev.commit_author
         )
@@ -102,7 +99,11 @@ def get_all_revisions(session, app):
     return res_str
 
 
-def activate(session, commit_sha, env):
+def activate(session, commit, env):
+    is_tag = False
+    if '.' in commit:
+        is_tag = True
+
     query = sa.select(
         [
             Revisions.s3_bucket_name,
@@ -111,7 +112,8 @@ def activate(session, commit_sha, env):
         ]
     ).where(
         sa.and_(
-            Revisions.commit_sha == commit_sha,
+            Revisions.tag == commit if is_tag else Revisions.commit_sha.like(
+                commit + "%"),
             Revisions.deploy_env == env
         )
     ).order_by(
