@@ -85,7 +85,7 @@ def activate(session, commit, env):
         if key.name:
             bucket.copy_key("index.html", bucket.name, key.name,
                             metadata={'Content-Type': 'text/html',
-                                      'Cache-Control: max-age=0, public'})
+                                      'Cache-Control': 'max-age=0'})
             return "Done!"
         else:
             return "There is no such revision."
