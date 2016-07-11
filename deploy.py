@@ -14,7 +14,7 @@ from new_frontend_deploy.core.models import Revisions
 from new_frontend_deploy.core.session import SessionContext
 from new_frontend_deploy.settings import SLACK_URL
 
-AVAILABLE_ENVS = ["dev", "staging", "test", "production"]
+AVAILABLE_ENVS = ["dev", "staging", "test", "production", "dev_ci"]
 
 
 class Deploy(object):

@@ -26,7 +26,7 @@ def get_all_revisions(session, app):
 
     revisions = session.execute(query).fetchall()
     if not revisions:
-        return "There is no revisions for this app"
+        return "There are no revisions for this app"
 
     res_str = ""
     for rev in revisions:
