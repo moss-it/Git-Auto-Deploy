@@ -73,8 +73,8 @@ def activate(session, commit, env):
         global_settings = yaml.load(f)
 
     try:
-        conn = boto.connect_s3(global_settings.get('aws_access_key'),
-                               global_settings.get('aws_secret_access_key'))
+        conn = boto.connect_s3(global_settings.get('aws_s3_key'),
+                               global_settings.get('aws_s3_secret_key'))
         bucket = conn.get_bucket(revision_data.s3_bucket_name)
     except Exception as e:
         print e.message
