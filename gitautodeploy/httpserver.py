@@ -269,10 +269,12 @@ class WebhookRequestHandler(BaseHTTPRequestHandler):
                         elif data.get('pull_request'):
                             repo_config.update(
                                 {'branch': data.get(
-                                    'pull_request').get('head').get('ref')})
+                                    'pull_request').get('base').get('ref')})
 
+                    print repo_config
                     res = GitWrapper.pull(repo_config)
                     repo_result['git pull'] = res
+                    print 'pull done!'
 
                     # Return code indicating success?
                     if res == 0:
