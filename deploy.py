@@ -343,7 +343,7 @@ class Deploy(object):
                         env
                     )
                     msg += "```Commit info:\nsha: {}\ndate: {}\nauthor: {}\nmessage: {}\n```".format(
-                        commit_data.get("sha"),
+                        commit_data.get("sha")[:7] if commit_data.get("sha") else "",
                         commit_data.get("date"),
                         commit_data.get("author"),
                         commit_data.get("message")
