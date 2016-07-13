@@ -262,7 +262,7 @@ class WebhookRequestHandler(BaseHTTPRequestHandler):
                             repo_config.update(
                                 {'tag': data.get('ref')})
 
-                        elif '/' in data.get('ref'):
+                        elif '/' in data.get('ref', ''):
                             repo_config.update(
                                 {'branch': data.get('ref').split('/')[-1]})
 
