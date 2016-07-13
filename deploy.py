@@ -41,7 +41,7 @@ class Deploy(object):
 
         return project_settings
 
-    def create_env_file(self, global_config, env):
+    def create_env_file(self, global_config, env, commit_sha):
 
         if not global_config:
             # There is no configs for such env
@@ -54,8 +54,7 @@ class Deploy(object):
 
         config_str += "aws_s3_bucket_name={}\n".format(
             global_config.get(self.app))
-        config_str += "aws_s3_bucket_prefix={}\n".format(
-            self.app + '/' + datetime.datetime.now().strftime('%Y%m%d_%H%M%S'))
+        config_str += "aws_s3_bucket_prefix={}\n".format(commit_sha)
 
         file_name = ".env.deploy.{}".format(env)
         if os.path.isfile(file_name):
@@ -228,7 +227,7 @@ class Deploy(object):
     def run(self):
 
         with SessionContext() as session:
-            pattern = re.compile(r"[A-z]+/[0-9A-z_]+/index.html:[A-z0-9]+")
+            pattern = re.compile(r"[0-9A-z_]+/index.html:[A-z0-9]+")
             for env in self.envs:
 
                 # Retrieve commit info
@@ -252,8 +251,12 @@ class Deploy(object):
                     "commit_date": commit_data.get('date'),
                     "commit_message": commit_data.get('message')
                 }
+                if not commit_data.get("sha"):
+                    print "Something goes wrong with fetching commit sha!"
+                    return
 
-                res = self.create_env_file(global_config, env)
+                res = self.create_env_file(global_config, env,
+                                           commit_data.get("sha")[:7])
 
                 if not res:
                     revision_data.update(
@@ -294,9 +297,9 @@ class Deploy(object):
 
                     if index_html_path:
                         index_html_path = index_html_path[0].split('/')
-                        path = '/'.join((index_html_path[0],
-                                         index_html_path[1]))
-                        revision_name = index_html_path[-1]
+                        path = index_html_path[0]
+
+                        revision_name = index_html_path[1]
 
                     if not path or not index_html_path:
                         revision_data.update(
