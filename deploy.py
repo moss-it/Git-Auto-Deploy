@@ -338,15 +338,17 @@ class Deploy(object):
                     new_deploy_data = Revisions(**revision_data)
                     session.add(new_deploy_data)
 
+                    commit_sha = commit_data.get("sha")[:7] \
+                        if commit_data.get("sha") else ""
                     msg = "`{}` :arrow_right: `{}`\n".format(self.app, env)
                     msg += "RELEASE TAG: `{}`\n".format(commit_data.get("tag")) \
                         if commit_data.get("tag") else ""
-                    msg += "activate command: `activate {} on {}`\n".format(
-                        commit_data.get("sha"),
+                    msg += "activate command: `manager activate {} on {}`\n".format(
+                        commit_sha,
                         env
                     )
                     msg += "```Commit info:\nsha: {}\ndate: {}\nauthor: {}\nmessage: {}\n```".format(
-                        commit_data.get("sha")[:7] if commit_data.get("sha") else "",
+                        commit_sha,
                         commit_data.get("date"),
                         commit_data.get("author"),
                         commit_data.get("message")
