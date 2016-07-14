@@ -340,13 +340,17 @@ class Deploy(object):
 
                     commit_sha = commit_data.get("sha")[:7] \
                         if commit_data.get("sha") else ""
+
                     msg = "`{}` :arrow_right: `{}`\n".format(self.app, env)
                     msg += "RELEASE TAG: `{}`\n".format(commit_data.get("tag")) \
                         if commit_data.get("tag") else ""
                     msg += "activate command: `manager activate {} on {}`\n".format(
-                        commit_sha,
+                        commit_data.get("tag") or commit_sha,
                         env
                     )
+                    msg += "test link: https://{}/?build={}".format(
+                        global_config.get(self.app), commit_sha)
+                    
                     msg += "```Commit info:\nsha: {}\ndate: {}\nauthor: {}\nmessage: {}\n```".format(
                         commit_sha,
                         commit_data.get("date"),
