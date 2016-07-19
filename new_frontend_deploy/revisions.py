@@ -14,6 +14,7 @@ def get_all_revisions(session, data):
     req_filter = data.get("record_created")
     enable_sorting = data.get("enable_sorting")
     offset = data.get("offset")
+    limit = data.get("limit")
     query = sa.select(
         [
             Revisions.commit_sha,
@@ -35,7 +36,7 @@ def get_all_revisions(session, data):
         sa.desc(
             Revisions.record_created if enable_sorting else Revisions.id
         )
-    ).offset(offset or 0).limit(50)
+    ).offset(offset or 0).limit(limit or 50)
 
     revisions = session.execute(query).fetchall()
     if not revisions:
