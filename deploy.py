@@ -351,7 +351,7 @@ class Deploy(object):
                     msg += "test link: https://{}/?build={}".format(
                         global_config.get(self.app), commit_sha)
                     
-                    msg += "```Commit info:\nsha: {}\ndate: {}\nauthor: {}\nmessage: {}\n```".format(
+                    msg += "\n```Commit info:\nsha: {}\ndate: {}\nauthor: {}\nmessage: {}\n```".format(
                         commit_sha,
                         commit_data.get("date"),
                         commit_data.get("author"),
