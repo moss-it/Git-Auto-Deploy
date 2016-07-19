@@ -22,6 +22,7 @@ def get_all_revisions(session, data):
             Revisions.tag,
             Revisions.record_created,
             Revisions.status,
+            Revisions.s3_bucket_name,
         ]
     ).where(
         sa.and_(
@@ -41,16 +42,19 @@ def get_all_revisions(session, data):
     resp = []
 
     for rev in revisions:
+        commit_sha = rev.commit_sha[:7] if rev.commit_sha else ""
         resp.append({
             "app": app,
             "env": rev.deploy_env,
-            "commit_sha": rev.commit_sha[:7] if rev.commit_sha else "",
+            "commit_sha": commit_sha,
             "commit_date": rev.commit_date,
             "commit_message": rev.commit_message,
             "commit_author": rev.commit_author,
             "tag": rev.tag,
             "record_created": str(rev.record_created),
-            "status": rev.status
+            "status": rev.status,
+            "test_link": "https://{}/?build={}".format(rev.s3_bucket_name,
+                                                       commit_sha)
         })
 
     return resp

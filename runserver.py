@@ -37,8 +37,8 @@ class MyHandler(BaseHTTPRequestHandler):
                 self._response(resp)
 
             elif self.path == "/activate/":
-                activate(session, data)
-                self._response("resp")
+                resp = activate(session, data)
+                self._response(resp)
         return
 
 
