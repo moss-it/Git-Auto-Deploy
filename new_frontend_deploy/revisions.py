@@ -8,16 +8,26 @@ from new_frontend_deploy.core.models import Revisions
 from new_frontend_deploy.settings import PATH_TO_CONFIGS
 
 
-def get_all_revisions(session, app):
+def get_all_revisions(session, data):
+
+    app = data.get("app")
+    req_filter = data.get("record_created")
     query = sa.select(
         [
             Revisions.commit_sha,
             Revisions.commit_author,
             Revisions.commit_date,
-            Revisions.deploy_env
+            Revisions.commit_message,
+            Revisions.deploy_env,
+            Revisions.tag,
+            Revisions.record_created,
+            Revisions.status,
         ]
     ).where(
-        Revisions.app == app
+        sa.and_(
+            Revisions.app == app,
+            Revisions.record_created >= req_filter
+        ) if req_filter else Revisions.app == app
     ).order_by(
         sa.desc(
             Revisions.id
@@ -28,35 +38,43 @@ def get_all_revisions(session, app):
     if not revisions:
         return "There are no revisions for this app"
 
-    res_str = ""
+    resp = []
+
     for rev in revisions:
-        res_str += '`{} {} {} {} {}`\n'.format(
-            app,
-            rev.deploy_env,
-            rev.commit_sha[:7] if rev.commit_sha else "",
-            rev.commit_date,
-            rev.commit_author
-        )
+        resp.append({
+            "app": app,
+            "env": rev.deploy_env,
+            "commit_sha": rev.commit_sha[:7] if rev.commit_sha else "",
+            "commit_date": rev.commit_date,
+            "commit_message": rev.commit_message,
+            "commit_author": rev.commit_author,
+            "tag": rev.tag,
+            "record_created": rev.record_created,
+            "status": rev.status
+        })
 
-    return res_str
+    return resp
 
 
-def activate(session, commit, env):
-    is_tag = False
-    if '.' in commit:
-        is_tag = True
+def activate(session, data):
+
+    app = data.get("app")
+    env = data.get("env")
+    commit = data.get("commit_sha")
+
+    if not app or not env or not commit:
+        return "Error! Invalid json!"
 
     query = sa.select(
         [
             Revisions.s3_bucket_name,
             Revisions.index_html_path,
-            Revisions.app
         ]
     ).where(
         sa.and_(
-            Revisions.tag == commit if is_tag else Revisions.commit_sha.like(
-                commit + "%"),
-            Revisions.deploy_env == env
+            Revisions.commit_sha.like(commit + "%"),
+            Revisions.deploy_env == env,
+            Revisions.app == app,
         )
     ).order_by(
         sa.asc(
@@ -78,7 +96,7 @@ def activate(session, commit, env):
         bucket = conn.get_bucket(revision_data.s3_bucket_name)
     except Exception as e:
         print e.message
-        return "Error with connection to AWS S3"
+        return "Error with connection to AWS S3!"
 
     try:
         key = bucket.get_key(revision_data.index_html_path + '/' + 'index.html')
@@ -88,7 +106,7 @@ def activate(session, commit, env):
                                       'Cache-Control': 'max-age=0'})
             return "Done!"
         else:
-            return "There is no such revision."
+            return "There is no such revision.!"
 
     except Exception as e:
         print e.message
