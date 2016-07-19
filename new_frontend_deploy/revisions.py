@@ -12,6 +12,7 @@ def get_all_revisions(session, data):
 
     app = data.get("app")
     req_filter = data.get("record_created")
+    enable_sorting = data.get("enable_sorting")
     query = sa.select(
         [
             Revisions.commit_sha,
@@ -31,7 +32,7 @@ def get_all_revisions(session, data):
         ) if req_filter else Revisions.app == app
     ).order_by(
         sa.desc(
-            Revisions.id
+            Revisions.record_created if enable_sorting else Revisions.id
         )
     ).limit(50)
 
