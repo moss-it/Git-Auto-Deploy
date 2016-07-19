@@ -49,7 +49,7 @@ def get_all_revisions(session, data):
             "commit_message": rev.commit_message,
             "commit_author": rev.commit_author,
             "tag": rev.tag,
-            "record_created": rev.record_created,
+            "record_created": str(rev.record_created),
             "status": rev.status
         })
 
