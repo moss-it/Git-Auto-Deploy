@@ -21,7 +21,7 @@ class MyHandler(BaseHTTPRequestHandler):
     def do_POST(self):
 
         length = int(self.headers.getheader('content-length'))
-        data = self.rfile.read(length)
+        data = json.loads(self.rfile.read(length))
 
         if data.get("token") != FRONTEND_TOKEN:
             self._response('Access denied')
